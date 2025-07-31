@@ -1,0 +1,215 @@
+.profile-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .profile-info__subscribe-btn {
+        height: 32px;
+    }
+
+    .editable-save,
+    .editable-cancel {
+        height: 32px;
+        padding: 4px 8px;
+        border-radius: 8px;
+        width: 100%;
+    }
+
+    .editable-save {
+        background-color: $bg-accent-1;
+    }
+
+    .editable-save:hover {
+        background-color: #0056b3;
+    }
+
+    .editable-cancel {
+        background-color: $bg-neutral;
+        color: #333;
+    }
+
+    .editable-cancel:hover {
+        background-color: #c0c0c0;
+    }
+
+    .editable-input {
+        font: inherit;
+        color: inherit;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 4px 6px;
+        width: 100%;
+        resize: none;
+        box-sizing: border-box;
+    }
+
+    .profile-info {
+        margin: 44px 0 44px 5px;
+        display: flex;
+        width: 100%;
+        gap: 2rem;
+        align-items: stretch;
+
+        &__photo {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                box-shadow: 0 0 0 2px white, 0 0 0 5px #aff218;
+            }
+
+            .btn--small {
+                border-radius: 8px;
+                background: $bg-accent-2;
+                color: white;
+                padding: 4px 8px;
+                font-size: 13px;
+                min-height: 32px;
+            }
+        }
+
+        &__text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+
+            h2 {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+
+            p {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 15px;
+                color: $text-primary;
+            }
+
+            .edit-icon {
+                cursor: pointer;
+                vertical-align: middle;
+            }
+
+            .edit-icon--name {
+                width: 24px;
+                height: 24px;
+            }
+
+            .edit-icon--about {
+                width: 16px;
+                height: 16px;
+            }
+
+        }
+
+        &__actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: start;
+            padding-top: 0.5rem;
+        }
+
+        &__subscribe-btn {
+            border: 1px solid $border-normal;
+            border-radius: 8px;
+            color: $text-action;
+            padding: 4px 8px;
+            height: 32px;
+        }
+    }
+
+    .profile-new-post {
+        width: 100%;
+        margin-bottom: 1.5rem;
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 21px;
+
+            textarea {
+                resize: none;
+                min-height: 136px;
+            }
+
+            button {
+                align-self: flex-end;
+            }
+        }
+    }
+
+    .profile-posts {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 65px;
+
+        .post-wrapper {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .edit-buttons .save-btn {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .edit-buttons .save-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .edit-buttons .cancel-btn {
+        background-color: #e0e0e0;
+        color: #333;
+    }
+
+    .edit-buttons .cancel-btn:hover {
+        background-color: #c0c0c0;
+    }
+
+}
+
+@media (max-width: 767px) {
+    .profile-page {
+        .profile-info {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1.5rem;
+            margin: 20px 0 !important;
+
+            &__photo {
+                align-items: center;
+                margin: 0 auto;
+            }
+
+            &__text {
+                align-items: center;
+
+                h2 {
+                    justify-content: center;
+                }
+
+                p {
+                    justify-content: center;
+                }
+            }
+
+            &__actions {
+                padding-top: 0;
+            }
+        }
+    }
+}

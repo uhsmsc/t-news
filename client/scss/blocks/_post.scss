@@ -1,0 +1,87 @@
+.post-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+    width: 100%;
+    font-size: 15px;
+}
+
+.post {
+    background: $bg-elevation;
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-family: sans-serif;
+    width: 100%;
+    box-shadow: 0px 6px 34px 0px rgba(0, 0, 0, 0.12);
+
+    &__header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 10px;
+    }
+
+    &__avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    &__username {
+        margin: 0;
+    }
+
+    &__text {
+        margin-bottom: 20px;
+    }
+
+    &__footer {
+        display: flex;
+        gap: 12px;
+    }
+
+    &__like-button,
+    &__comment-button {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+
+    &__like-button {
+        background-color: $bg-accent-1;
+
+        img {
+            width: 24px;
+        }
+    }
+
+    &__comment-button {
+        background-color: $bg-neutral;
+        color: $text-action;
+
+        &--active {
+            border: 1px solid $border-normal;
+            background-color: $bg-elevation;
+        }
+    }
+
+    &__like-button:hover,
+    &__comment-button:hover {
+        cursor: pointer;
+    }
+}
+
+#feed {
+    display: flex;
+    flex-direction: column;
+    gap: 65px;
+    padding: 65px 0;
+}
