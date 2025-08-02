@@ -1,4 +1,4 @@
-import { api } from "./api.js";
+import { api } from "../services/api.js";
 import { renderHeader } from "../components/header.js";
 
 export function showLogin(_, navigate) {

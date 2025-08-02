@@ -14,19 +14,23 @@ router.get("/", async (req, res) => {
 
   if (type === "users") {
     const users = await readData("users.json");
-    if (!q) {
-      return res.json(users.map(({ password, ...rest }) => rest));
-    }
-    const found = users.filter(
-      (u) =>
-        u.username.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)
+    const found = users.filter(u =>
+      u.name
+        .toLowerCase()
+        .split(/[^a-zA-Zа-яА-ЯёЁ]+/)
+        .some(word => word.startsWith(q))
     );
     return res.json(found.map(({ password, ...rest }) => rest));
   }
 
   if (type === "posts") {
     const posts = await readData("posts.json");
-    const found = posts.filter((p) => p.content.toLowerCase().includes(q));
+    const found = posts.filter(p =>
+      p.content
+        .toLowerCase()
+        .split(/[^a-zA-Zа-яА-ЯёЁ]+/)
+        .some(word => word.startsWith(q))
+    );
     return res.json(found);
   }
 

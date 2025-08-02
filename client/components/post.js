@@ -5,20 +5,20 @@ export function createPostCard(post, author, currentUserId) {
     : "../assets/images/heart-outline.svg";
 
   return `
-    <article class="post" data-id="${post.id}">
-      <div class="post__header">
-        <img src="${author.avatar}" alt="аватар" class="post__avatar">
-        <h3 class="post__username">${author.name}</h3>
-      </div>
-      <p class="post__text">${post.content}</p>
-      <div class="post__footer">
-        <button class="post__like-button" data-liked="${liked}">
-          <img src="${iconSrc}" class="post__like-icon"> ${post.likes.length}
-        </button>
-        <button class="post__comment-button" data-post-id="${post.id}">
-          Комментарии ${post.commentCount ?? 0}
-        </button>
-      </div>
-    </article>
-  `;
+            <article class="post" data-id="${post.id}">
+              <div class="post__header">
+                <img src="${author.avatar}" alt="аватар" class="post__avatar" data-user-id="${author.id}">
+                <h3 class="post__username" data-user-id="${author.id}">${author.name}</h3>
+              </div>
+              <p class="post__text">${post.content}</p>
+              <div class="post__footer">
+                <button class="post__like-button" data-liked="${liked}">
+                  <img src="${iconSrc}" class="post__like-icon"> ${post.likes.length}
+                </button>
+                <button class="post__comment-button" data-post-id="${post.id}">
+                  Комментарии ${post.commentCount ?? 0}
+                </button>
+              </div>
+            </article>
+          `;
 }

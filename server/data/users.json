@@ -10,7 +10,8 @@
       2
     ],
     "following": [
-      2
+      1753942094616,
+      8
     ]
   },
   {
@@ -91,7 +92,9 @@
     "name": "Марк Порций Катон Младший",
     "bio": "Обо мне: римский политик, стоик и непримиримый противник Цезаря. Символ республиканской добродетели и строгости нравов. Известен своей неподкупностью и преданностью идеалам Республики. Совершил самоубийство после победы Цезаря.",
     "avatar": "/uploads/cato.jpg",
-    "followers": [],
+    "followers": [
+      1
+    ],
     "following": [
       7
     ]
@@ -102,6 +105,18 @@
     "password": "1234",
     "name": "Татьяна",
     "bio": "Я люблю котиковfhdjfbjdbf\njfdfjdnfjndjfnjdnfjhd\nnfjhbdjhfbjdhbfjhdbfh\njdbfhdbjfhbdjfhdbfhjbdjfbdjhfbdhjbfhdbfhbdh\nfbdhjbfhjdbfjhbdjhfв",
+    "avatar": "/uploads/default.svg",
+    "followers": [
+      1
+    ],
+    "following": []
+  },
+  {
+    "id": 1754044128921,
+    "username": "user",
+    "password": "1234",
+    "name": "аноним",
+    "bio": "я аноним",
     "avatar": "/uploads/default.svg",
     "followers": [],
     "following": []

@@ -1,18 +1,13 @@
-export function showComment(comment, author, currentUser, postAuthorId) {
-  const canDelete = !!currentUser && currentUser.id === postAuthorId;
+import { escapeHtml } from "../utils/escapeHtml.js";
 
+export function createCommentCard(comment, author) {
   return `
-    <div class="comment" data-comment-id="${comment.id}">
+    <div class="comment" data-comment-id="${comment.id}" data-author-id="${author.id}">
       <div class="comment__header">
-        <img class="comment__avatar" src="${author.avatar}" alt="аватар">
-        <h3 class="comment__author">${author.name}</h3>
-        ${canDelete ? `
-          <button class="comment__delete-button" title="Удалить комментарий">
-            <img src="/assets/images/container.svg" alt="Удалить">
-          </button>
-        ` : ""}
+        <img src="${escapeHtml(author.avatar)}" alt="avatar" class="comment__avatar" />
+        <h3 class="comment__author" data-user-id="${author.id}">${escapeHtml(author.name)}</h3>
       </div>
-      <div class="comment__content">${comment.content}</div>
+      <div class="comment__content">${escapeHtml(comment.content)}</div>
     </div>
   `;
 }

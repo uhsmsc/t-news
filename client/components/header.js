@@ -1,5 +1,5 @@
-import { getCurrentUser, logout } from "../pages/authState.js";
-import { navigate } from "../pages/app.js";
+import { getCurrentUser, logout } from "../services/authState.js";
+import { navigate } from "../app.js";
 
 export function renderHeader({
   auth = false,

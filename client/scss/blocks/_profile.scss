@@ -80,6 +80,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
+            width: 100%;
 
             h2 {
                 display: flex;
@@ -98,16 +99,30 @@
             .edit-icon {
                 cursor: pointer;
                 vertical-align: middle;
+                cursor: pointer;
             }
 
             .edit-icon--name {
                 width: 24px;
                 height: 24px;
+                cursor: pointer;
             }
 
             .edit-icon--about {
                 width: 16px;
                 height: 16px;
+                cursor: pointer;
+            }
+
+            .editable-bio {
+                width: 100%;
+
+                textarea,
+                .editable-input {
+                    width: 100%;
+                    height: 130px;
+                    box-sizing: border-box;
+                }
             }
 
         }

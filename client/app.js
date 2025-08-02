@@ -1,9 +1,8 @@
-import { showLogin } from "./auth.js";
-import { showFeed } from "./feed.js";
-import { showProfile } from "./profile.js";
-import { isAuthenticated } from "./authState.js";
-import { showRegister } from "./register.js";
-import {showSearchPage} from "./showSearchResults.js";
+import { showLogin } from "./pages/auth.js";
+import { showFeed } from "./pages/feed.js";
+import { showProfile } from "./pages/profile.js";
+import { showRegister } from "./pages/register.js";
+import { showSearchPage } from "./pages/search.js";
 
 const routes = {
   login: showLogin,
@@ -13,24 +12,18 @@ const routes = {
   search: showSearchPage,
 };
 
-const privatePages = ["profile", "settings"];
-
 function navigate(page, params = {}) {
   history.pushState({ page, params }, "", `#${page}`);
   render(page, params);
 }
 
 function render(page = "feed", params = {}) {
-  if (!isAuthenticated() && privatePages.includes(page)) {
-    return routes.login(params, navigate);
-  }
-
-  const fn = routes[page] || showLogin;
+  const fn = routes[page] || showFeed;
   fn(params, navigate);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  let page = window.location.hash.replace("#", "") || "feed";
+  const page = window.location.hash.replace("#", "") || "feed";
   history.replaceState({ page }, "", `#${page}`);
   render(page);
 });

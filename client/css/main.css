@@ -140,18 +140,28 @@ a {
 
 h3 {
   font-family: "TinkoffSans", sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 28px;
   color: rgba(0, 0, 0, 0.8);
 }
+@media (min-width: 770px) {
+  h3 {
+    font-size: 24px;
+  }
+}
 
 h2 {
   font-family: "TinkoffSans", sans-serif;
-  font-size: 36px;
+  font-size: 25px;
   font-weight: 500;
   line-height: 28px;
   color: rgba(0, 0, 0, 0.8);
+}
+@media (min-width: 770px) {
+  h2 {
+    font-size: 36px;
+  }
 }
 
 .container {
@@ -200,23 +210,13 @@ h2 {
 h1 {
   font-family: "TinkoffSans", sans-serif;
   font-weight: 400;
-  font-size: 24px;
+  font-size: 20px;
   -ms-flex-item-align: start;
       align-self: flex-start;
 }
 @media (min-width: 770px) {
   h1 {
-    font-size: 32px;
-  }
-}
-@media (min-width: 1600px) {
-  h1 {
-    font-size: 40px;
-  }
-}
-@media (min-width: 1920px) {
-  h1 {
-    font-size: 44px;
+    font-size: 24px;
   }
 }
 
@@ -237,6 +237,10 @@ img {
 
 input {
   font-family: "NeueHaasUnica", sans-serif;
+}
+
+.delete-btn {
+  cursor: pointer;
 }
 
 .header {
@@ -552,10 +556,10 @@ input {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  gap: 19px;
   -webkit-box-align: end;
       -ms-flex-align: end;
           align-items: flex-end;
+  width: 100%;
 }
 
 .comments-container--visible {
@@ -564,16 +568,29 @@ input {
   display: flex;
 }
 
+.comments-list {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: 20px;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  width: 100%;
+}
+
 .comment {
   background: #fff;
   border-radius: 24px;
   padding: 0 24px;
-  -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  -webkit-box-shadow: 0px 6px 34px rgba(0, 0, 0, 0.12);
+          box-shadow: 0px 6px 34px rgba(0, 0, 0, 0.12);
   font-family: sans-serif;
   width: 88%;
-  -webkit-box-shadow: 0px 6px 34px 0px rgba(0, 0, 0, 0.12);
-          box-shadow: 0px 6px 34px 0px rgba(0, 0, 0, 0.12);
 }
 .comment__header {
   display: -webkit-box;
@@ -586,23 +603,18 @@ input {
   padding: 20px 0;
 }
 .comment__avatar {
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   -o-object-fit: cover;
      object-fit: cover;
-}
-.comment__time {
-  font-size: 12px;
-  color: #888;
 }
 .comment__content {
   line-height: 1.4;
   padding-bottom: 24px;
 }
 
-.comment-form {
-  margin-top: 5px;
+.comments-footer {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -610,8 +622,32 @@ input {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  width: 100%;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+}
+
+.comments-toggle-btn {
+  -ms-flex-item-align: end;
+      align-self: flex-end;
+  width: auto;
+  color: rgba(0, 0, 0, 0.54);
+  margin-top: 20px;
+}
+
+.comment-form {
+  margin-top: 20px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: 20px;
   width: 88%;
-  gap: 8px;
+  margin-left: auto;
 }
 .comment-form textarea {
   width: 100%;
@@ -819,6 +855,7 @@ input {
       -ms-flex-direction: column;
           flex-direction: column;
   gap: 14px;
+  width: 100%;
 }
 .profile-page .profile-info__text h2 {
   display: -webkit-box;
@@ -843,14 +880,27 @@ input {
 .profile-page .profile-info__text .edit-icon {
   cursor: pointer;
   vertical-align: middle;
+  cursor: pointer;
 }
 .profile-page .profile-info__text .edit-icon--name {
   width: 24px;
   height: 24px;
+  cursor: pointer;
 }
 .profile-page .profile-info__text .edit-icon--about {
   width: 16px;
   height: 16px;
+  cursor: pointer;
+}
+.profile-page .profile-info__text .editable-bio {
+  width: 100%;
+}
+.profile-page .profile-info__text .editable-bio textarea,
+.profile-page .profile-info__text .editable-bio .editable-input {
+  width: 100%;
+  height: 130px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 .profile-page .profile-info__actions {
   display: -webkit-box;
@@ -1015,5 +1065,3 @@ input {
 .user-card__name {
   font-weight: 500;
 }
-
-/* Минимальный стиль для контейнера комментариев */

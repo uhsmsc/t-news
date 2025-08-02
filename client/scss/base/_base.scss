@@ -49,18 +49,26 @@ a {
 
 h3 {
   font-family: $font-accent;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 28px;
   color: $text-primary;
+
+  @media (min-width: 770px) {
+    font-size: 24px;
+  }
 }
 
 h2 {
   font-family: $font-accent;
-  font-size: 36px;
+  font-size: 25px;
   font-weight: 500;
   line-height: 28px;
   color: $text-primary;
+
+  @media (min-width: 770px) {
+    font-size: 36px;
+  }
 }
 
 .container {
@@ -100,19 +108,11 @@ h2 {
 h1 {
   font-family: $font-accent;
   font-weight: 400;
-  font-size: 24px;
+  font-size: 20px;
   align-self: flex-start;
 
   @media (min-width: 770px) {
-    font-size: 32px;
-  }
-
-  @media (min-width: 1600px) {
-    font-size: 40px;
-  }
-
-  @media (min-width: 1920px) {
-    font-size: 44px;
+    font-size: 24px;
   }
 }
 
@@ -132,4 +132,8 @@ img {
 
 input {
   font-family: $font-main;
+}
+
+.delete-btn {
+  cursor: pointer;
 }

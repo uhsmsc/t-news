@@ -1,22 +1,29 @@
 .comments-container {
   display: none;
   flex-direction: column;
-  gap: 19px;
   align-items: flex-end;
+  width: 100%;
 }
 
 .comments-container--visible {
   display: flex;
 }
 
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-end;
+  width: 100%;
+}
+
 .comment {
   background: #fff;
   border-radius: 24px;
   padding: 0 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 6px 34px rgba(0, 0, 0, 0.12);
   font-family: sans-serif;
   width: 88%;
-  box-shadow: 0px 6px 34px 0px rgba(0, 0, 0, 0.12);
 
   &__header {
     display: flex;
@@ -26,30 +33,39 @@
   }
 
   &__avatar {
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     object-fit: cover;
-  }
-
-  &__time {
-    font-size: 12px;
-    color: #888;
   }
 
   &__content {
     line-height: 1.4;
     padding-bottom: 24px;
-
   }
 }
 
-.comment-form {
-  margin-top: 5px;
+.comments-footer {
   display: flex;
   flex-direction: column;
-  width: 88%;
-  gap: 8px;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.comments-toggle-btn {
+  align-self: flex-end;
+  width: auto;
+  color: $text-secondary;
+  margin-top: 20px;
+}
+
+.comment-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 88%;          
+  margin-left: auto;
 
   textarea {
     width: 100%;

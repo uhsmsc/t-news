@@ -1,8 +1,7 @@
 import { renderHeader } from "../components/header.js";
-import { api } from "./api.js";
-import { createPostCard } from "../components/post.js";
-import { getCurrentUser } from "./authState.js";
-import { setupCommentsToggle, setupLikeButton } from "./feed.js";
+import { api } from "../services/api.js";
+import { getCurrentUser } from "../services/authState.js";
+import { renderPosts } from "../features/postRenderer.js";
 
 export async function showSearchPage({ query = "", type = "users" }, navigate) {
   const app = document.getElementById("app");
@@ -82,10 +81,9 @@ export async function showSearchPage({ query = "", type = "users" }, navigate) {
     }
   });
 
-  // Функция для создания карточки пользователя с фото и именем
   function createUserCard(user) {
     return `
-      <div class="user-card">
+      <div class="user-card" data-user-id="${user.id}">
         <img 
           src="${user.avatar || "../assets/images/default-avatar.svg"}" 
           alt="${user.name}" 
@@ -94,17 +92,6 @@ export async function showSearchPage({ query = "", type = "users" }, navigate) {
         <h3 class="user-card__name">${user.name}</h3>
       </div>
     `;
-  }
-
-  // Получаем авторов для постов
-  async function getAuthors(posts) {
-    const authorMap = {};
-    for (const post of posts) {
-      if (!authorMap[post.authorId]) {
-        authorMap[post.authorId] = await api.getUser(post.authorId);
-      }
-    }
-    return authorMap;
   }
 
   async function updateResults() {
@@ -121,46 +108,42 @@ export async function showSearchPage({ query = "", type = "users" }, navigate) {
         results.innerHTML = users.length
           ? users.map(createUserCard).join("")
           : "Пользователи не найдены";
+
+        results.querySelectorAll("[data-user-id]").forEach((el) => {
+          el.style.cursor = "pointer";
+          el.addEventListener("click", () => {
+            navigate("profile", { userId: el.dataset.userId });
+          });
+        });
       } else {
-        const posts = await api.search(currentQuery, "posts");
+        let posts = await api.search(currentQuery, "posts");
         if (posts.length) {
-          const authorMap = await getAuthors(posts);
-          const currentUser = getCurrentUser();
-          const currentUserId = currentUser?.id || null;
-
-          results.innerHTML = posts
-            .map((post) => {
-              const author = authorMap[post.authorId];
-              return createPostCard(post, author, currentUserId);
-            })
-            .join("");
-
-          // Для каждого поста создаём контейнер комментариев и подключаем лайки и комментарии
-          posts.forEach((post) => {
-            const postElement = results.querySelector(
-              `.post[data-id="${post.id}"]`
-            );
-            if (!postElement) return;
-
-            // Создаём контейнер для комментариев и вставляем после поста
-            let commentsContainer = results.querySelector(
-              `.comments-container[data-post-id="${post.id}"]`
-            );
-            if (!commentsContainer) {
-              commentsContainer = document.createElement("div");
-              commentsContainer.classList.add("comments-container");
-              commentsContainer.dataset.postId = post.id;
-              postElement.insertAdjacentElement("afterend", commentsContainer);
+          const authorMap = {};
+          for (const post of posts) {
+            if (!authorMap[post.authorId]) {
+              authorMap[post.authorId] = await api.getUser(post.authorId);
             }
+          }
 
-            setupLikeButton(postElement, post.id, currentUserId, navigate);
-            setupCommentsToggle(
-              postElement,
-              post.id,
-              post.authorId,
-              commentsContainer,
-              navigate
-            );
+          // Получаем количество комментариев по всем постам
+          const postIds = posts.map(p => p.id);
+          const commentCounts = await api.getCommentCounts(postIds);
+
+          // Добавляем commentCount в каждый пост
+          posts = posts.map(post => ({
+            ...post,
+            commentCount: commentCounts[post.id] || 0,
+          }));
+
+          const currentUser = getCurrentUser();
+
+          await renderPosts({
+            container: results,
+            posts,
+            authorsMap: authorMap,
+            currentUser,
+            navigate,
+            onRefresh: updateResults,
           });
         } else {
           results.textContent = "Посты не найдены";

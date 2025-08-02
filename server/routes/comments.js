@@ -55,7 +55,7 @@ router.delete("/:id", async (req, res) => {
     return res.status(404).json({ error: "Пост не найден" });
   }
 
-  if (post.authorId !== userId) {
+  if (comment.authorId !== userId) {
     return res.status(403).json({ error: "Нет прав" });
   }
 
