@@ -1,0 +1,5 @@
+PORT: 3000
+JWT_SECRET: please-dont-hack-my-secret-key88 #  openssl rand -base64 32
+USERS_DATA: data/users.json
+POSTS_DATA: data/posts.json
+COMMENTS_DATA: data/comments.json

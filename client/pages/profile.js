@@ -8,45 +8,49 @@ export async function showProfile(params, navigate) {
   const app = document.getElementById("app");
   const loggedInUser = getCurrentUser();
 
-  const profileUserId = params?.userId || loggedInUser?.id;
-  if (!profileUserId) {
+  if (!params?.userId && !loggedInUser?.id) {
     navigate("login");
     return;
   }
 
-  // Загружаем данные профиля
-  let currentUser = await api.getUser(profileUserId);
-  const isOwner = loggedInUser && loggedInUser.id === currentUser.id;
+  const userIdToLoad = params?.userId || loggedInUser.id;
+
+  // Загружаем пользователя
+  let currentUser;
+  try {
+    currentUser = await api.getUser(userIdToLoad);
+  } catch {
+    navigate("feed");
+    return;
+  }
+
+  const isOwner = loggedInUser?.id === currentUser.id;
 
   // Проверка подписки
   let isSubscribed = false;
   if (loggedInUser && !isOwner) {
     try {
-      const res = await api.isFollowing(currentUser.id, loggedInUser.id);
+      const res = await api.isFollowing(currentUser.id);
       isSubscribed = res.isSubscribed;
-    } catch {
-      isSubscribed = false;
-    }
+    } catch {}
   }
 
   // Рендер шапки
   app.innerHTML = "";
   renderHeader({
     auth: !!loggedInUser,
-    onSearch: (query) => {
-      if (!query) navigate("feed");
-      else navigate("search", { query });
-    },
+    onSearch: (query) => navigate(query ? "search" : "feed", { query }),
   });
 
-  // Основная разметка профиля
   const main = document.createElement("main");
   main.className = "main";
   main.innerHTML = `
     <div class="container profile-page">
       <section class="profile-info">
         <div class="profile-info__photo">
-          <img src="${currentUser.avatar}" alt="Аватар" class="profile-avatar"/>
+          <img src="${escapeHtml(
+            currentUser.avatar
+          )}" alt="Аватар" class="profile-avatar"/>
           ${
             isOwner
               ? `<button class="btn btn--small" id="changePhotoBtn">Изменить фото</button>`
@@ -55,10 +59,10 @@ export async function showProfile(params, navigate) {
         </div>
         <div class="profile-info__text">
           <h2 class="editable-name">
-            ${escapeHtml(currentUser.name)}
+            ${escapeHtml(currentUser.name || "")}
             ${
               isOwner
-                ? `<img src="../assets/images/edit.svg" alt="Редактировать" class="edit-icon--name" id="editNameBtn" />`
+                ? `<img src="../assets/images/edit.svg" alt="Редактировать" id="editNameBtn" class="edit-icon--name" />`
                 : ""
             }
           </h2>
@@ -66,7 +70,7 @@ export async function showProfile(params, navigate) {
             ${escapeHtml(currentUser.bio || "Расскажите о себе...")}
             ${
               isOwner
-                ? `<img src="../assets/images/edit.svg" alt="Редактировать" class="edit-icon--about" id="editAboutBtn" />`
+                ? `<img src="../assets/images/edit.svg" alt="Редактировать" id="editAboutBtn" class="edit-icon--bio"/>`
                 : ""
             }
           </p>
@@ -77,14 +81,12 @@ export async function showProfile(params, navigate) {
               ? `<div class="profile-followers">Подписчики: ${
                   currentUser.followers?.length || 0
                 }</div>`
-              : loggedInUser
-              ? `<button class="profile-info__subscribe-btn" id="subscribeBtn">${
-                  isSubscribed ? "Отписаться" : "Подписаться"
-                }</button>
-                 <span class="profile-followers-count">Подписчики: ${
-                   currentUser.followers?.length || 0
-                 }</span>`
-              : `<button class="profile-info__subscribe-btn" id="subscribeBtn">Подписаться</button>`
+              : `<button class="profile-info__subscribe-btn" id="subscribeBtn">
+                ${isSubscribed ? "Отписаться" : "Подписаться"}
+               </button>
+               <span class="profile-followers-count">Подписчики: ${
+                 currentUser.followers?.length || 0
+               }</span>`
           }
         </div>
       </section>
@@ -98,8 +100,7 @@ export async function showProfile(params, navigate) {
             <button type="submit">Отправить</button>
           </form>
         </section>
-        <hr />
-      `
+        <hr />`
           : ""
       }
       <section class="profile-posts" id="profilePosts"></section>
@@ -108,49 +109,52 @@ export async function showProfile(params, navigate) {
   app.appendChild(main);
 
   // Подписка
-  const subscribeBtn = document.getElementById("subscribeBtn");
-  if (subscribeBtn) {
-    subscribeBtn.addEventListener("click", async () => {
-      if (!loggedInUser) {
-        navigate("login");
-        return;
+  document
+    .getElementById("subscribeBtn")
+    ?.addEventListener("click", async () => {
+      if (!loggedInUser) return navigate("login");
+      try {
+        const result = isSubscribed
+          ? await api.unfollowUser(currentUser.id)
+          : await api.followUser(currentUser.id);
+        isSubscribed = result.isSubscribed;
+        document.getElementById("subscribeBtn").textContent = isSubscribed
+          ? "Отписаться"
+          : "Подписаться";
+        document.querySelector(
+          ".profile-followers-count"
+        ).textContent = `Подписчики: ${result.followersCount}`;
+      } catch {
+        alert("Не удалось обновить подписку");
       }
-      const result = await api.follow(currentUser.id, loggedInUser.id);
-      subscribeBtn.textContent = result.isSubscribed
-        ? "Отписаться"
-        : "Подписаться";
-      const followersCountEl = document.querySelector(
-        ".profile-followers-count"
-      );
-      if (followersCountEl) {
-        followersCountEl.textContent = `Подписчики: ${result.followersCount}`;
-      }
     });
-  }
 
-  // Смена фото
-  if (isOwner) {
-    document.getElementById("changePhotoBtn")?.addEventListener("click", () => {
-      alert("Загрузка нового фото пока не реализована");
-    });
-  }
+  // Смена фото (заглушка)
+  document.getElementById("changePhotoBtn")?.addEventListener("click", () => {
+    alert("Загрузка нового фото пока не реализована");
+  });
 
-  // Редактирование имени/био
+  // Редактирование имени и биографии
   if (isOwner) {
-    document.getElementById("editNameBtn")?.addEventListener("click", () => {
-      makeEditable(
-        document.querySelector(".editable-name"),
-        "name",
-        currentUser.name
+    document
+      .getElementById("editNameBtn")
+      ?.addEventListener("click", () =>
+        makeEditable(
+          document.querySelector(".editable-name"),
+          "name",
+          currentUser.name || ""
+        )
       );
-    });
-    document.getElementById("editAboutBtn")?.addEventListener("click", () => {
-      makeEditable(
-        document.querySelector(".editable-bio"),
-        "bio",
-        currentUser.bio || "Расскажите о себе..."
+
+    document
+      .getElementById("editAboutBtn")
+      ?.addEventListener("click", () =>
+        makeEditable(
+          document.querySelector(".editable-bio"),
+          "bio",
+          currentUser.bio || ""
+        )
       );
-    });
   }
 
   function makeEditable(containerEl, fieldName, initialValue) {
@@ -161,10 +165,11 @@ export async function showProfile(params, navigate) {
     const isBio = fieldName === "bio";
     const input = document.createElement(isBio ? "textarea" : "input");
     input.className = "editable-input";
-    input.value = initialValue || "";
+    input.value = initialValue;
 
     containerEl.innerHTML = "";
     containerEl.appendChild(input);
+    input.focus();
 
     const actionsEl = document.querySelector(".profile-info__actions");
 
@@ -180,75 +185,71 @@ export async function showProfile(params, navigate) {
 
     saveBtn.addEventListener("click", async () => {
       const newValue = input.value.trim();
-      if (!newValue) return;
-      const updatedUser = await api.updateUser(currentUser.id, {
-        [fieldName]: newValue,
-      });
-      currentUser = { ...currentUser, ...updatedUser };
-      renderEditableField(containerEl, fieldName, updatedUser[fieldName] || "");
-      saveBtn.remove();
-      cancelBtn.remove();
-      if (fieldName === "name") {
-        await loadUserPosts();
+      if (!newValue) return alert("Значение не может быть пустым");
+
+      try {
+        const updatedUser = await api.updateUser(currentUser.id, {
+          [fieldName]: newValue,
+        });
+        currentUser = { ...currentUser, ...updatedUser };
+        renderEditableField(
+          containerEl,
+          fieldName,
+          updatedUser[fieldName] || ""
+        );
+        saveBtn.remove();
+        cancelBtn.remove();
+
+        if (fieldName === "name") {
+          await loadUserPosts();
+        }
+      } catch {
+        alert("Не удалось сохранить изменения");
       }
     });
 
     cancelBtn.addEventListener("click", () => {
-      renderEditableField(containerEl, fieldName, initialValue || "");
+      renderEditableField(containerEl, fieldName, initialValue);
       saveBtn.remove();
       cancelBtn.remove();
     });
   }
 
   function renderEditableField(containerEl, fieldName, value) {
-    containerEl.innerHTML = `${escapeHtml(
-      value
-    )} <img src="../assets/images/edit.svg" class="edit-icon--${fieldName}" />`;
-    containerEl.querySelector("img").addEventListener("click", () => {
+    containerEl.innerHTML = `
+    ${escapeHtml(value)} 
+    <img src="../assets/images/edit.svg" alt="Редактировать" class="edit-icon--${fieldName}" />
+  `;
+
+    const editIcon = containerEl.querySelector("img");
+    editIcon.addEventListener("click", () => {
       makeEditable(containerEl, fieldName, value);
     });
   }
 
   // Новый пост
-  if (isOwner) {
-    document
-      .getElementById("newPostForm")
-      ?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const content = document.getElementById("newPostContent").value.trim();
-        if (!content) return;
-        await api.createPost({ authorId: currentUser.id, content });
+  document
+    .getElementById("newPostForm")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const content = document.getElementById("newPostContent").value.trim();
+      if (!content) return alert("Пост не может быть пустым");
+      try {
+        await api.createPost({ content });
         document.getElementById("newPostContent").value = "";
         await loadUserPosts();
-      });
-  }
+      } catch {
+        alert("Ошибка при создании поста");
+      }
+    });
 
-  // Функция загрузки постов профиля
+  // Загрузка постов профиля
   async function loadUserPosts() {
     const container = document.getElementById("profilePosts");
-    container.innerHTML = `<div class="feed__loading">Загрузка...</div>`;
-
     try {
-      const posts = (await api.getUserPosts(currentUser.id))
-        .filter((p) => p.authorId === currentUser.id)
-        .sort((a, b) => b.id - a.id);
+      const posts = await api.getUserPosts(userIdToLoad);
 
-      const authorMap = {};
-
-      // 1. Загружаем авторов постов
-      for (const post of posts) {
-        if (!authorMap[post.authorId]) {
-          authorMap[post.authorId] = await api.getUser(post.authorId);
-        }
-
-        // 2. Загружаем авторов комментариев к посту
-        const comments = await api.getComments(post.id);
-        for (const comment of comments) {
-          if (!authorMap[comment.authorId]) {
-            authorMap[comment.authorId] = await api.getUser(comment.authorId);
-          }
-        }
-      }
+      const authorMap = { [currentUser.id]: currentUser };
 
       await renderPosts({
         container,

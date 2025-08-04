@@ -1,4 +1,3 @@
-@charset "UTF-8";
 /* Reset and base styles  */
 * {
   padding: 0px;
@@ -562,12 +561,6 @@ input {
   width: 100%;
 }
 
-.comments-container--visible {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-}
-
 .comments-list {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -887,7 +880,7 @@ input {
   height: 24px;
   cursor: pointer;
 }
-.profile-page .profile-info__text .edit-icon--about {
+.profile-page .profile-info__text .edit-icon--bio {
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -925,7 +918,6 @@ input {
 }
 .profile-page .profile-new-post {
   width: 100%;
-  margin-bottom: 1.5rem;
 }
 .profile-page .profile-new-post .comment-form {
   display: -webkit-box;

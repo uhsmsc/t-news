@@ -4,21 +4,15 @@ import { createDeleteButton } from "../utils/deleteButton.js";
 
 const COMMENTS_BATCH_SIZE = 5;
 
-export async function renderComments(
-  postId,
-  container,
-  currentUser,
-  navigate
-) {
+export async function renderComments(postId, container, currentUser, navigate) {
   try {
     const comments = await api.getComments(postId);
-    const authorsMap = {};
 
-    for (const comment of comments) {
-      if (!authorsMap[comment.authorId]) {
-        authorsMap[comment.authorId] = await api.getUser(comment.authorId);
-      }
-    }
+    const userIds = [...new Set(comments.map((c) => c.userId))];
+    const authorsList = await Promise.all(userIds.map((id) => api.getUser(id)));
+    const authorsMap = Object.fromEntries(
+      authorsList.map((author) => [author.id, author])
+    );
 
     container.innerHTML = "";
 
@@ -37,28 +31,38 @@ export async function renderComments(
       commentsFooter.appendChild(toggleBtn);
     }
 
-    const form = createCommentForm(postId, container, currentUser, navigate);
-    commentsFooter.appendChild(form);
-    container.appendChild(commentsFooter);
+    if (currentUser) {
+      const form = createCommentForm(
+        postId,
+        container,
+        currentUser,
+        navigate,
+        authorsMap
+      );
+      commentsFooter.appendChild(form);
+    }
+
+    if (commentsFooter.children.length > 0) {
+      container.appendChild(commentsFooter);
+    }
 
     function updateToggleBtn() {
-      if (!toggleBtn) return;
-      toggleBtn.textContent =
-        shownCount >= comments.length ? "Скрыть комментарии" : "Показать ещё";
+      if (toggleBtn) {
+        toggleBtn.textContent =
+          shownCount >= comments.length ? "Скрыть комментарии" : "Показать ещё";
+      }
     }
 
     function renderBatch() {
-      const batch = comments.slice(shownCount, shownCount + COMMENTS_BATCH_SIZE);
+      const batch = comments.slice(
+        shownCount,
+        shownCount + COMMENTS_BATCH_SIZE
+      );
       for (const comment of batch) {
-        const author = authorsMap[comment.authorId];
-        const commentEl = createCommentElement(
-          comment,
-          author,
-          currentUser,
-          navigate,
-          postId
+        const author = authorsMap[comment.userId];
+        commentsList.appendChild(
+          createCommentElement(comment, author, currentUser, navigate, postId)
         );
-        commentsList.appendChild(commentEl);
       }
       shownCount += batch.length;
       updateToggleBtn();
@@ -67,8 +71,11 @@ export async function renderComments(
     if (toggleBtn) {
       toggleBtn.addEventListener("click", () => {
         if (shownCount >= comments.length) {
+          // Скрываем комментарии
           const postWrapper = container.closest(".post-wrapper");
-          const commentBtn = postWrapper?.querySelector(".post__comment-button");
+          const commentBtn = postWrapper?.querySelector(
+            ".post__comment-button"
+          );
           if (commentBtn) commentBtn.click();
         } else {
           renderBatch();
@@ -94,24 +101,37 @@ function createCommentElement(comment, author, currentUser, navigate, postId) {
   });
 
   if (currentUser && currentUser.id === author.id) {
-    const deleteBtn = createDeleteButton(async () => {
-      try {
-        await api.deleteComment(comment.id, currentUser.id);
-        div.remove();
-        updateCommentsCountForPost(postId, -1);
-      } catch (err) {
-        alert("Ошибка при удалении комментария");
-        console.error(err);
-      }
-    });
-    div.querySelector(".comment__header").appendChild(deleteBtn);
+    const header = div.querySelector(".comment__header");
+    if (header) {
+      const deleteBtn = createDeleteButton(async () => {
+        try {
+          await api.deleteComment(comment.id, postId);
+          div.remove();
+          updateCommentsCountForPost(postId, -1);
+        } catch (err) {
+          alert("Ошибка при удалении комментария");
+          console.error(err);
+        }
+      });
+      header.appendChild(deleteBtn);
+    }
   }
 
   return div;
 }
 
-async function appendComment(newComment, currentUser, navigate, container) {
-  const author = await api.getUser(newComment.authorId);
+async function appendComment(
+  newComment,
+  currentUser,
+  navigate,
+  container,
+  authorsMap
+) {
+  let author = authorsMap?.[newComment.userId];
+  if (!author) {
+    author = await api.getUser(newComment.userId);
+    if (authorsMap) authorsMap[newComment.userId] = author;
+  }
   const commentEl = createCommentElement(
     newComment,
     author,
@@ -119,14 +139,16 @@ async function appendComment(newComment, currentUser, navigate, container) {
     navigate,
     newComment.postId
   );
-
-  const commentsList = container.querySelector(".comments-list");
-  if (commentsList) {
-    commentsList.appendChild(commentEl);
-  }
+  container.querySelector(".comments-list")?.appendChild(commentEl);
 }
 
-function createCommentForm(postId, container, currentUser, navigate) {
+function createCommentForm(
+  postId,
+  container,
+  currentUser,
+  navigate,
+  authorsMap
+) {
   const form = document.createElement("form");
   form.className = "comment-form";
   form.innerHTML = `
@@ -140,20 +162,19 @@ function createCommentForm(postId, container, currentUser, navigate) {
     const content = textarea.value.trim();
     if (!content) return;
 
-    if (!currentUser) {
-      alert("Нужно войти");
-      navigate("login");
-      return;
-    }
-
     try {
-      const newComment = await api.addComment({
-        postId,
-        authorId: currentUser.id,
+      const newComment = await api.addComment(postId, {
+        userId: currentUser.id,
         content,
       });
       textarea.value = "";
-      await appendComment(newComment, currentUser, navigate, container);
+      await appendComment(
+        newComment,
+        currentUser,
+        navigate,
+        container,
+        authorsMap
+      );
       updateCommentsCountForPost(postId, 1);
     } catch (err) {
       alert("Ошибка при добавлении комментария");
@@ -165,13 +186,11 @@ function createCommentForm(postId, container, currentUser, navigate) {
 }
 
 export function updateCommentsCountForPost(postId, delta) {
-  const postWrapper = document.querySelector(`.post-wrapper[data-post-id="${postId}"]`);
-  if (!postWrapper) return;
-
-  const commentBtn = postWrapper.querySelector(".post__comment-button");
+  const commentBtn = document.querySelector(
+    `.post-wrapper[data-post-id="${postId}"] .post__comment-button`
+  );
   if (!commentBtn) return;
-
-  const currentCount = Number(commentBtn.textContent.replace(/[^\d]/g, "")) || 0;
-  const newCount = currentCount + delta;
-  commentBtn.textContent = `Комментарии ${newCount}`;
+  const currentCount =
+    Number(commentBtn.textContent.replace(/[^\d]/g, "")) || 0;
+  commentBtn.textContent = `Комментарии ${currentCount + delta}`;
 }

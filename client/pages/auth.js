@@ -37,13 +37,17 @@ export function showLogin(_, navigate) {
 
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
 
     try {
-      const { token, user } = await api.login({ username, password });
+      const { token } = await api.login({ username, password });
       localStorage.setItem("token", token);
+
+      const user = await api.getUser("me");
       localStorage.setItem("user", JSON.stringify(user));
+
       navigate("feed");
     } catch (err) {
       showError(err.error || "Ошибка входа");

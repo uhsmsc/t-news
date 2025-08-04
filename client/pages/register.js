@@ -31,15 +31,31 @@ export function showRegister(_, navigate) {
 
   const errorEl = document.getElementById("registerError");
 
+  const errorMessagesMap = {
+    "User already exists": "Пользователь с таким логином уже существует",
+    "Password must be at least 4 characters":
+      "Пароль должен содержать минимум 4 символов",
+    "Username must be a string with at least 3 characters":
+      "Логин должен содержать минимум 3 символа",
+  };
+
   function showError(message) {
     errorEl.textContent = message;
     errorEl.classList.add("form-error--visible");
+  }
+
+  function mapErrorMessage(serverMessage) {
+    return (
+      errorMessagesMap[serverMessage] ||
+      "Ошибка регистрации. Проверьте введённые данные."
+    );
   }
 
   document
     .getElementById("registerForm")
     .addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const passwordRepeat = document
@@ -57,11 +73,11 @@ export function showRegister(_, navigate) {
       }
 
       try {
-        const { message } = await api.register({ username, password });
-        alert(message);
+        await api.register({ username, password });
         navigate("login");
       } catch (err) {
-        showError(err.error || "Ошибка регистрации");
+        const serverMessage = err?.error || err?.message || "";
+        showError(mapErrorMessage(serverMessage));
       }
     });
 

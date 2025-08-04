@@ -22,23 +22,27 @@ export async function showFeed(_, navigate) {
   app.appendChild(main);
 
   const feedContainer = document.getElementById("feed");
-  feedContainer.innerHTML = `<div class="feed__loading">Загрузка...</div>`;
 
-  // Загружаем посты и авторов
-  const posts = await api.getFeed();
-  const authorMap = {};
-  for (const post of posts) {
-    if (!authorMap[post.authorId]) {
-      authorMap[post.authorId] = await api.getUser(post.authorId);
-    }
+  try {
+    // Получаем посты
+    const posts = await api.getFeed();
+
+    const uniqueuserIds = [...new Set(posts.map((p) => p.userId))];
+    const authorMapEntries = await Promise.all(
+      uniqueuserIds.map((id) => api.getUser(id).then((user) => [id, user]))
+    );
+    const authorMap = Object.fromEntries(authorMapEntries);
+
+    // Рендерим посты
+    await renderPosts({
+      container: feedContainer,
+      posts,
+      authorsMap: authorMap,
+      currentUser,
+      navigate,
+    });
+  } catch (error) {
+    feedContainer.innerHTML = `<div class="feed__error">Ошибка загрузки ленты</div>`;
+    console.error("Ошибка загрузки ленты:", error);
   }
-
-  // Рендерим посты
-  await renderPosts({
-    container: feedContainer,
-    posts,
-    authorsMap: authorMap,
-    currentUser,
-    navigate,
-  });
 }

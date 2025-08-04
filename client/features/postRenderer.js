@@ -16,8 +16,10 @@ export async function renderPosts({
 }) {
   container.innerHTML = "";
 
-  for (const post of posts) {
-    const author = authorsMap[post.authorId];
+  const sortedPosts = [...posts].reverse();
+
+  for (const post of sortedPosts) {
+    const author = authorsMap[post.userId];
     if (!author) continue;
 
     const postElement = createPostElement(
@@ -58,7 +60,8 @@ function createPostElement(
   wrapper.appendChild(commentsContainer);
 
   attachProfileLinks(postEl, navigate);
-  setupLikeButton(postEl, post.id, currentUser?.id, navigate, onRefresh);
+  setupLikeButton(postEl, post.id, currentUser?.id, navigate, post.likes || []);
+
   setupCommentsToggle(
     postEl,
     post.id,
@@ -68,20 +71,22 @@ function createPostElement(
     onRefresh
   );
 
-  if (allowDelete && currentUser?.id === post.authorId) {
+  if (allowDelete && currentUser?.id === post.userId) {
     const deleteBtn = createDeleteButton(async () => {
       try {
-        await api.deletePost(post.id, currentUser.id);
+        await api.deletePost(post.id);
         if (onRefresh) await onRefresh();
       } catch (err) {
         alert("Не удалось удалить пост");
         console.error(err);
       }
     });
-    postEl.querySelector(".post__header").appendChild(deleteBtn);
+    const headerEl = postEl.querySelector(".post__header");
+    if (headerEl) headerEl.appendChild(deleteBtn);
   }
 
-  updateCommentsCount(postEl, post.commentCount || 0);
+  updateCommentsCount(postEl, post.commentCount);
+
   return wrapper;
 }
 
@@ -104,13 +109,19 @@ function setupCommentsToggle(
   if (!commentBtn) return;
 
   commentsContainer.dataset.loaded = "false";
-  commentsContainer.style.display = "none";
 
   commentBtn.addEventListener("click", async () => {
     const isVisible = commentsContainer.style.display !== "none";
 
     if (!isVisible) {
+      if (!currentUser) {
+        const commentsCount =
+          Number(commentBtn.textContent.replace(/\D/g, "")) || 0;
+        if (commentsCount === 0) return;
+      }
+
       commentsContainer.style.display = "block";
+
       if (commentsContainer.dataset.loaded === "false") {
         await renderComments(
           postId,
